@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ponché de Moccaccino — Distribución Industrial</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Josefin+Sans:wght@100;300;400;600&display=swap" rel="stylesheet">
+<!-- QRCode library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root {
+    --cream: #F5EDD8;
+    --warm-white: #FAF5EC;
+    --espresso: #2C1200;
+    --mocha: #4A1F00;
+    --caramel: #C47A1E;
+    --chocolate: #5C2D0A;
+    --gold: #C8862A;
+    --light-brown: #A0522D;
+    --foam: #EDE0C4;
+    --accent: #6B2D0A;
+    --bg-light: #F0E6D3;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body {
+    background: var(--warm-white);
+    color: var(--espresso);
+    font-family: 'Josefin Sans', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Cursor */
+  .cursor { width:10px;height:10px;background:var(--gold);border-radius:50%;position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s; }
+  .cursor-ring { width:32px;height:32px;border:1.5px solid var(--gold);border-radius:50%;position:fixed;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all .12s ease;opacity:.55; }
+
+  /* ---- NAV ---- */
+  nav {
+    background: var(--espresso);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 4rem;
+    height: 70px;
+    position: sticky; top:0; z-index:500;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+  }
+  .nav-logo-wrap { display:flex;align-items:center;gap:0.75rem; }
+  .nav-logo-img { height:44px;border-radius:4px; }
+  .nav-brand { font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;color:var(--foam);opacity:.7; }
+  .nav-links { display:flex;gap:2.5rem;list-style:none; }
+  .nav-links a { font-size:.65rem;letter-spacing:.22em;text-transform:uppercase;color:var(--foam);text-decoration:none;opacity:.65;transition:opacity .3s,color .3s; }
+  .nav-links a:hover { opacity:1;color:var(--gold); }
+  .nav-qr-btn {
+    background: var(--gold); color: var(--espresso);
+    border:none; padding:.5rem 1.25rem;
+    font-family:'Josefin Sans',sans-serif; font-size:.6rem;
+    letter-spacing:.18em; text-transform:uppercase; font-weight:600;
+    cursor:none; transition:background .2s;
+  }
+  .nav-qr-btn:hover { background:var(--caramel); }
+
+  /* ---- HERO ---- */
+  .hero {
+    background: var(--espresso);
+    min-height: 92vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    padding: 5rem 5rem 4rem;
+    gap: 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content:'';position:absolute;inset:0;
+    background: radial-gradient(ellipse at 70% 50%, rgba(196,122,30,.12) 0%, transparent 60%);
+    pointer-events:none;
+  }
+  .hero-eyebrow {
+    font-size:.6rem;letter-spacing:.4em;text-transform:uppercase;
+    color:var(--gold);margin-bottom:1rem;
+    opacity:0;animation:fadeUp 1s ease .3s forwards;
+  }
+  .hero-title {
+    font-family:'Playfair Display',serif;
+    font-size:clamp(3rem,6vw,5.5rem);
+    font-weight:900;line-height:.95;color:var(--cream);
+    opacity:0;animation:fadeUp 1s ease .5s forwards;
+  }
+  .hero-title em { font-style:italic;color:var(--gold);display:block; }
+  .hero-tagline {
+    display:flex;align-items:center;gap:.6rem;
+    margin:1.5rem 0;font-size:.65rem;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--foam);opacity:0;
+    animation:fadeUp 1s ease .65s forwards;
+  }
+  .hero-tagline span { color:var(--gold);font-size:.5rem; }
+  .hero-desc {
+    font-size:.85rem;line-height:1.85;color:var(--foam);opacity:0;
+    font-weight:300;max-width:440px;
+    animation:fadeUp 1s ease .75s forwards;
+  }
+  .hero-stats {
+    display:flex;gap:2.5rem;margin-top:2.5rem;
+    opacity:0;animation:fadeUp 1s ease .9s forwards;
+  }
+  .stat-item { text-align:center; }
+  .stat-num { font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:900;color:var(--gold); }
+  .stat-label { font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--foam);opacity:.55;margin-top:.2rem; }
+  .hero-cta-group {
+    display:flex;gap:1.2rem;margin-top:2.8rem;
+    opacity:0;animation:fadeUp 1s ease 1.05s forwards;
+  }
+  .btn-primary {
+    background:var(--gold);color:var(--espresso);border:none;
+    padding:.9rem 2.2rem;font-family:'Josefin Sans',sans-serif;
+    font-size:.68rem;font-weight:600;letter-spacing:.2em;
+    text-transform:uppercase;cursor:none;text-decoration:none;
+    transition:background .3s,transform .2s;
+  }
+  .btn-primary:hover { background:var(--caramel);transform:translateY(-2px); }
+  .btn-outline {
+    background:transparent;color:var(--foam);
+    border:1px solid rgba(237,224,196,.3);
+    padding:.9rem 2.2rem;font-family:'Josefin Sans',sans-serif;
+    font-size:.68rem;font-weight:300;letter-spacing:.2em;
+    text-transform:uppercase;cursor:none;text-decoration:none;
+    transition:border-color .3s,color .3s;
+  }
+  .btn-outline:hover { border-color:var(--gold);color:var(--gold); }
+
+  /* Hero image / logo side */
+  .hero-visual {
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;
+    opacity:0;animation:fadeIn 1.2s ease .6s forwards;
+    position:relative;
+  }
+  .hero-logo-circle {
+    width:380px;height:380px;border-radius:50%;
+    background:radial-gradient(circle at 40% 40%, #5C2D0A 0%, #2C1200 70%);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 30px 80px rgba(0,0,0,.5), 0 0 0 1px rgba(196,122,30,.2);
+    animation:floatY 7s ease-in-out infinite;
+    overflow:hidden;
+  }
+  .hero-logo-img { width:320px;height:320px;object-fit:contain; }
+  .hero-badge-row { display:flex;gap:1rem; }
+  .hero-badge {
+    background:rgba(196,122,30,.12);border:1px solid rgba(196,122,30,.3);
+    padding:.5rem 1rem;font-size:.55rem;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--gold);
+  }
+
+  /* ---- SECTION COMMONS ---- */
+  .section-label { font-size:.58rem;letter-spacing:.4em;text-transform:uppercase;color:var(--gold);margin-bottom:.8rem; }
+  .section-title { font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3.5rem);font-weight:700;line-height:1.1; }
+
+  /* ---- ABOUT / BRAND ---- */
+  .section-brand {
+    background:var(--warm-white);
+    padding:7rem 5rem;
+    display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;
+    position:relative;overflow:hidden;
+  }
+  .section-brand::after {
+    content:'MOCCA';font-family:'Playfair Display',serif;font-size:18vw;font-weight:900;
+    position:absolute;right:-2vw;bottom:-4vw;color:rgba(44,18,0,.04);pointer-events:none;line-height:1;
+  }
+  .brand-title { color:var(--mocha);margin-bottom:1.2rem; }
+  .brand-text { font-size:.88rem;line-height:1.9;color:var(--chocolate);opacity:.85;font-weight:300;margin-bottom:1.5rem; }
+  .channels-grid { display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.5rem; }
+  .channel-card {
+    background:var(--espresso);color:var(--cream);
+    padding:1.4rem;position:relative;overflow:hidden;
+  }
+  .channel-card::before { content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--gold); }
+  .channel-icon { font-size:1.4rem;margin-bottom:.4rem; }
+  .channel-name { font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold); }
+  .channel-desc { font-size:.72rem;opacity:.55;margin-top:.25rem;line-height:1.5; }
+
+  .brand-visual { position:relative;display:flex;align-items:center;justify-content:center; }
+  .brand-logo-wrap {
+    width:340px;height:340px;border-radius:50%;
+    background:var(--bg-light);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 20px 60px rgba(44,18,0,.15);
+    animation:floatY 9s ease-in-out infinite 1.5s;
+  }
+  .brand-logo-img { width:290px;height:290px;object-fit:contain; }
+  .orbit { position:absolute;border:1px dashed rgba(196,122,30,.2);border-radius:50%;animation:spin 25s linear infinite; }
+  .orbit-1 { width:400px;height:400px; }
+  .orbit-2 { width:460px;height:460px;animation-direction:reverse;animation-duration:35s; }
+  .orbit-dot { width:7px;height:7px;background:var(--gold);border-radius:50%;position:absolute;top:-3px;left:50%;transform:translateX(-50%); }
+
+  /* ---- PRODUCTS ---- */
+  .section-products {
+    background:var(--espresso);
+    padding:7rem 4rem;position:relative;overflow:hidden;
+  }
+  .section-products::before { content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent); }
+  .products-section-header { text-align:center;margin-bottom:4.5rem; }
+  .products-section-header .section-title { color:var(--cream); }
+
+  .products-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+    gap:1.2rem;max-width:1300px;margin:0 auto;
+  }
+  .product-card {
+    background:rgba(245,237,216,.04);
+    border:1px solid rgba(196,122,30,.15);
+    padding:1.8rem 1.4rem 1.5rem;
+    text-align:center;
+    transition:background .3s,border-color .3s,transform .3s;
+    position:relative;overflow:hidden;cursor:none;
+    display:flex;flex-direction:column;align-items:center;
+  }
+  .product-card:hover {
+    background:rgba(196,122,30,.09);
+    border-color:rgba(196,122,30,.55);
+    transform:translateY(-6px);
+  }
+  .product-card.featured { background:rgba(196,122,30,.11);border-color:var(--gold); }
+  .featured-badge {
+    position:absolute;top:0;right:0;
+    background:var(--gold);color:var(--espresso);
+    font-size:.52rem;letter-spacing:.18em;text-transform:uppercase;
+    padding:.3rem .7rem;font-weight:600;
+  }
+
+  /* Bottle with logo overlay */
+  .bottle-wrap {
+    position:relative;width:120px;height:190px;
+    margin-bottom:1rem;
+    filter:drop-shadow(0 15px 30px rgba(0,0,0,.5));
+    animation:floatY 5s ease-in-out infinite;
+    flex-shrink:0;
+  }
+  .bottle-wrap:nth-child(odd) { animation-delay:.8s; }
+  .bottle-svg-el { width:100%;height:100%; }
+  .bottle-logo-overlay {
+    position:absolute;
+    top:50%;left:50%;
+    transform:translate(-50%,-48%);
+    width:72px;height:72px;
+    object-fit:contain;
+    border-radius:50%;
+  }
+
+  .product-size { font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:700;color:var(--gold); }
+  .product-name { font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--foam);opacity:.65;margin-top:.25rem; }
+  .product-channel { font-size:.6rem;letter-spacing:.12em;color:var(--gold);opacity:.7;margin-top:.3rem; }
+  .product-desc { font-size:.72rem;line-height:1.65;color:var(--foam);opacity:.5;margin:.85rem 0;font-weight:300; }
+  .product-price { font-family:'Playfair Display',serif;font-size:1.65rem;font-weight:700;color:var(--cream);margin-top:auto; }
+  .product-price span { font-size:.75rem;font-family:'Josefin Sans',sans-serif;opacity:.45;font-weight:300; }
+  .add-to-cart {
+    margin-top:1.2rem;width:100%;
+    background:transparent;border:1px solid rgba(196,122,30,.35);
+    color:var(--gold);padding:.8rem;
+    font-family:'Josefin Sans',sans-serif;font-size:.6rem;
+    letter-spacing:.18em;text-transform:uppercase;
+    cursor:none;transition:background .3s,color .3s,border-color .3s;
+  }
+  .add-to-cart:hover { background:var(--gold);color:var(--espresso);border-color:var(--gold); }
+
+  /* ---- CART ---- */
+  .section-cart { background:var(--warm-white);padding:7rem 5rem; }
+  .cart-layout { display:grid;grid-template-columns:1fr 360px;gap:3.5rem;max-width:1100px;margin:0 auto; }
+  .cart-header-area { margin-bottom:2.5rem; }
+  .cart-header-area .section-label { color:var(--gold); }
+  .cart-header-title { font-family:'Playfair Display',serif;font-size:clamp(1.8rem,3.5vw,3rem);font-weight:700;color:var(--mocha); }
+
+  .cart-items-list { display:flex;flex-direction:column;gap:.85rem; }
+  .cart-empty { text-align:center;padding:4rem 2rem;color:var(--chocolate);opacity:.35; }
+  .cart-empty-icon { font-size:3.5rem;margin-bottom:.8rem; }
+  .cart-empty-text { font-family:'Playfair Display',serif;font-size:1.4rem;font-style:italic; }
+
+  .cart-item {
+    display:flex;align-items:center;gap:1rem;
+    background:white;border:1px solid rgba(44,18,0,.07);
+    padding:.9rem 1.3rem;animation:fadeUp .4s ease;
+  }
+  .cart-item-logo { width:44px;height:44px;object-fit:contain;border-radius:50%;background:var(--bg-light);padding:3px;flex-shrink:0; }
+  .cart-item-info { flex:1; }
+  .cart-item-name { font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--mocha); }
+  .cart-item-size { font-family:'Playfair Display',serif;font-size:.82rem;color:var(--caramel);font-style:italic; }
+  .cart-item-controls { display:flex;align-items:center;gap:.65rem; }
+  .qty-btn { width:26px;height:26px;background:var(--espresso);color:var(--cream);border:none;font-size:.95rem;cursor:none;display:flex;align-items:center;justify-content:center;transition:background .2s; }
+  .qty-btn:hover { background:var(--mocha); }
+  .qty-display { font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;min-width:1.8rem;text-align:center;color:var(--mocha); }
+  .cart-item-price { font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:var(--mocha);min-width:75px;text-align:right; }
+  .cart-item-remove { background:none;border:none;color:var(--accent);cursor:none;font-size:.9rem;opacity:.35;transition:opacity .2s; }
+  .cart-item-remove:hover { opacity:1; }
+
+  /* Summary */
+  .order-summary {
+    background:var(--espresso);color:var(--cream);
+    padding:2.2rem;position:sticky;top:80px;height:fit-content;
+  }
+  .summary-logo { width:80px;height:80px;object-fit:contain;border-radius:50%;background:rgba(255,255,255,.06);padding:6px;margin:0 auto 1.5rem;display:block; }
+  .summary-title { font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--gold);margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid rgba(196,122,30,.2); }
+  .summary-row { display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:.65rem;opacity:.72; }
+  .summary-total { display:flex;justify-content:space-between;margin-top:1.3rem;padding-top:1.3rem;border-top:1px solid rgba(196,122,30,.2);font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;color:var(--gold); }
+  .discount-section { margin:1.3rem 0; }
+  .discount-label { font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;opacity:.5;margin-bottom:.4rem; }
+  .discount-row { display:flex;gap:.5rem; }
+  .discount-input { flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(196,122,30,.2);color:var(--cream);padding:.7rem;font-family:'Josefin Sans',sans-serif;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;outline:none; }
+  .discount-input:focus { border-color:var(--gold); }
+  .discount-apply { background:var(--gold);border:none;color:var(--espresso);padding:.7rem .9rem;font-family:'Josefin Sans',sans-serif;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;font-weight:600;cursor:none;transition:background .2s; }
+  .discount-apply:hover { background:var(--caramel); }
+  .checkout-btn { width:100%;background:var(--gold);color:var(--espresso);border:none;padding:1.1rem;font-family:'Josefin Sans',sans-serif;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;font-weight:600;cursor:none;margin-top:1.8rem;transition:background .3s,transform .2s; }
+  .checkout-btn:hover { background:var(--caramel);transform:translateY(-2px); }
+  .checkout-btn:disabled { opacity:.3;cursor:not-allowed;transform:none; }
+  .discount-msg { font-size:.68rem;margin-top:.45rem;color:#7dff8a;min-height:.9rem; }
+  .discount-msg.error { color:#ff7d7d; }
+
+  /* ---- QR MODAL ---- */
+  .modal-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(10px); }
+  .modal-overlay.active { display:flex; }
+  .modal { background:var(--warm-white);color:var(--espresso);padding:3rem;max-width:420px;width:90%;text-align:center;animation:fadeUp .5s ease; }
+  .modal-icon { font-size:3.5rem;margin-bottom:1.2rem; }
+  .modal-title { font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:700;color:var(--mocha);margin-bottom:.8rem; }
+  .modal-text { font-size:.82rem;line-height:1.7;color:var(--chocolate);opacity:.8;font-weight:300; }
+  .modal-order { background:var(--espresso);color:var(--cream);padding:1.3rem;margin:1.5rem 0;text-align:left;font-size:.78rem;line-height:1.8; }
+  .modal-close { background:var(--espresso);color:var(--cream);border:none;padding:.9rem 2.2rem;font-family:'Josefin Sans',sans-serif;font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;cursor:none;transition:background .2s;margin-top:.5rem; }
+  .modal-close:hover { background:var(--mocha); }
+
+  /* ---- QR PANEL MODAL ---- */
+  .qr-modal { background:var(--espresso);color:var(--cream);padding:3rem;max-width:380px;width:90%;text-align:center;animation:fadeUp .5s ease; }
+  .qr-title { font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:var(--gold);margin-bottom:.5rem; }
+  .qr-subtitle { font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--foam);opacity:.6;margin-bottom:2rem; }
+  #qrcode { display:flex;justify-content:center;margin-bottom:1.5rem; }
+  #qrcode canvas, #qrcode img { border:10px solid white;border-radius:4px; }
+  .qr-url { font-size:.68rem;color:var(--foam);opacity:.45;word-break:break-all;margin-bottom:1.5rem; }
+  .qr-download {
+    background:var(--gold);color:var(--espresso);border:none;
+    padding:.85rem 2rem;font-family:'Josefin Sans',sans-serif;
+    font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;font-weight:600;
+    cursor:none;transition:background .2s;margin-right:.5rem;
+  }
+  .qr-download:hover { background:var(--caramel); }
+  .qr-close { background:transparent;color:var(--foam);border:1px solid rgba(237,224,196,.25);padding:.85rem 1.5rem;font-family:'Josefin Sans',sans-serif;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;cursor:none;transition:border-color .2s; }
+  .qr-close:hover { border-color:var(--gold);color:var(--gold); }
+
+  /* ---- FOOTER ---- */
+  footer { background:var(--espresso);padding:3.5rem 4rem;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(196,122,30,.1); }
+  .footer-left { display:flex;align-items:center;gap:1rem; }
+  .footer-logo { height:56px;object-fit:contain; }
+  .footer-brand { font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--foam);opacity:.35; }
+  .footer-copy { font-size:.6rem;color:var(--foam);opacity:.25;letter-spacing:.08em; }
+
+  /* Animations */
+  @keyframes fadeUp { from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeIn { from{opacity:0}to{opacity:1} }
+  @keyframes floatY { 0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)} }
+  @keyframes spin { from{transform:rotate(0deg)}to{transform:rotate(360deg)} }
+
+  @media(max-width:900px){
+    nav { padding:0 1.5rem; }
+    .nav-links,.nav-qr-btn { display:none; }
+    .hero { grid-template-columns:1fr;padding:3rem 2rem;min-height:auto;gap:2rem; }
+    .hero-visual { order:-1; }
+    .hero-logo-circle { width:260px;height:260px; }
+    .hero-logo-img { width:220px;height:220px; }
+    .section-brand { grid-template-columns:1fr;padding:4rem 2rem;gap:3rem; }
+    .brand-visual { order:-1; }
+    .section-products { padding:4rem 1.5rem; }
+    .section-cart { padding:4rem 1.5rem; }
+    .cart-layout { grid-template-columns:1fr; }
+    .order-summary { position:static; }
+    footer { flex-direction:column;gap:1rem;text-align:center;padding:2.5rem 2rem; }
+  }
+
+  /* ---- QR SECTION ---- */
+  .section-qr {
+    background: var(--mocha);
+    padding: 6rem 4rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .section-qr::before { content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent); }
+  .section-qr::after { content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent); }
+  .qr-section-title { font-family:'Playfair Display',serif;font-size:clamp(1.8rem,3.5vw,3rem);font-weight:700;color:var(--cream);margin-bottom:.6rem; }
+  .qr-section-sub { font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;color:var(--foam);opacity:.55;margin-bottom:2.5rem; }
+  .qr-box {
+    display:inline-flex;flex-direction:column;align-items:center;gap:1.5rem;
+    background:rgba(245,237,216,.05);border:1px solid rgba(196,122,30,.25);
+    padding:2.5rem 3rem;
+  }
+  .qr-box-inner { background:white;padding:14px;border-radius:4px;display:inline-block; }
+  .qr-section-url { font-size:.7rem;letter-spacing:.12em;color:var(--gold);opacity:.75; }
+  .qr-section-hint { font-size:.65rem;color:var(--foam);opacity:.4;letter-spacing:.08em; }
+  .qr-dl-btn {
+    background:var(--gold);color:var(--espresso);border:none;
+    padding:.8rem 2rem;font-family:'Josefin Sans',sans-serif;
+    font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;font-weight:600;
+    cursor:none;transition:background .2s;
+  }
+  .qr-dl-btn:hover { background:var(--caramel); }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo-wrap">
+    <img class="nav-logo-img" id="navLogoImg" alt="Ponché Moccaccino">
+    <span class="nav-brand">Distribución Industrial</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#marca">Marca</a></li>
+    <li><a href="#productos">Productos</a></li>
+    <li><a href="#pedido">Pedido</a></li><li><a href="#qr">QR</a></li>
+  </ul>
+  <button class="nav-qr-btn" onclick="openQR()">📱 Ver QR</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-copy">
+    <p class="hero-eyebrow">Distribución Industrial · Supermercados & Coffee Shops</p>
+    <h1 class="hero-title">Ponché de<em>Moccaccino</em></h1>
+    <div class="hero-tagline">
+      Cremoso <span>●</span> Café y Chocolate <span>●</span> Hecho con Amor
+    </div>
+    <p class="hero-desc">
+      Bebida lista para consumir que combina el intenso sabor del café con la riqueza del chocolate oscuro. Formulada para distribución a gran escala: supermercados, cadenas de café y puntos de venta especializados.
+    </p>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-num">5</div>
+        <div class="stat-label">Formatos</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">0</div>
+        <div class="stat-label">Conservantes</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">100%</div>
+        <div class="stat-label">Natural</div>
+      </div>
+    </div>
+    <div class="hero-cta-group">
+      <a href="#productos" class="btn-primary">Ver Catálogo</a>
+      <a href="#pedido" class="btn-outline">Hacer Pedido</a>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="hero-logo-circle">
+      <img class="hero-logo-img" id="heroLogoImg" alt="Ponché Moccaccino Logo">
+    </div>
+    <div class="hero-badge-row">
+      <div class="hero-badge">🏪 Supermercados</div>
+      <div class="hero-badge">☕ Coffee Shops</div>
+    </div>
+  </div>
+</section>
+
+<!-- BRAND -->
+<section class="section-brand" id="marca">
+  <div>
+    <p class="section-label">Nuestra Marca</p>
+    <h2 class="section-title brand-title">Calidad industrial,<br>sabor auténtico</h2>
+    <p class="brand-text">
+      Ponché de Moccaccino es una bebida de distribución masiva que no sacrifica calidad. Elaborada con café arábica y chocolate de alta pureza, nuestra fórmula está optimizada para producción en volumen, manteniendo consistencia de sabor en cada lote.
+    </p>
+    <p class="brand-text" style="margin-bottom:0">
+      Diseñada para integrarse en las góndolas de supermercados y vitrinas de coffee shops, con presentaciones que destacan en anaquel y atraen al consumidor moderno.
+    </p>
+    <div class="channels-grid">
+      <div class="channel-card"><div class="channel-icon">🏬</div><div class="channel-name">Supermercados</div><div class="channel-desc">Formatos familiares y de uso diario, listos para anaquel frío.</div></div>
+      <div class="channel-card"><div class="channel-icon">☕</div><div class="channel-name">Coffee Shops</div><div class="channel-desc">Porciones individuales y presentaciones premium para barra.</div></div>
+      <div class="channel-card"><div class="channel-icon">🏭</div><div class="channel-name">B2B / Mayoreo</div><div class="channel-desc">Cajas de distribución para revendedores y distribuidores.</div></div>
+      <div class="channel-card"><div class="channel-icon">🛒</div><div class="channel-name">E-commerce</div><div class="channel-desc">Packs digitales y entregas directas al consumidor final.</div></div>
+    </div>
+  </div>
+  <div class="brand-visual">
+    <div class="orbit orbit-1"><div class="orbit-dot"></div></div>
+    <div class="orbit orbit-2"><div class="orbit-dot"></div></div>
+    <div class="brand-logo-wrap">
+      <img class="brand-logo-img" id="brandLogoImg" alt="Logo Moccaccino">
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section class="section-products" id="productos">
+  <div class="products-section-header">
+    <p class="section-label">Catálogo de Productos</p>
+    <h2 class="section-title">Formatos para cada <em style="font-style:italic;color:var(--gold)">canal</em></h2>
+  </div>
+  <div class="products-grid" id="productsGrid"></div>
+</section>
+
+<!-- CART -->
+<section class="section-cart" id="pedido">
+  <div style="max-width:1100px;margin:0 auto;">
+    <div class="cart-header-area">
+      <p class="section-label">Simulación de Compra</p>
+      <h2 class="cart-header-title">Tu Pedido</h2>
+    </div>
+    <div class="cart-layout">
+      <div class="cart-items-list" id="cartItems">
+        <div class="cart-empty">
+          <div class="cart-empty-icon">🛒</div>
+          <div class="cart-empty-text">Tu carrito está vacío</div>
+          <p style="font-size:.72rem;margin-top:.4rem;opacity:.5">Agrega productos desde el catálogo</p>
+        </div>
+      </div>
+      <div class="order-summary">
+        <img class="summary-logo" id="summaryLogoImg" alt="Logo">
+        <div class="summary-title">Resumen del Pedido</div>
+        <div class="summary-row"><span>Subtotal</span><span id="subtotal">$0.00</span></div>
+        <div class="summary-row" id="discountRow" style="display:none;color:#7dff8a;"><span>Descuento</span><span id="discountAmt">-$0.00</span></div>
+        <div class="summary-row"><span>Envío</span><span id="shipping">$0.00</span></div>
+        <div class="summary-row"><span>IVA (16%)</span><span id="tax">$0.00</span></div>
+        <div class="discount-section">
+          <div class="discount-label">Código de descuento</div>
+          <div class="discount-row">
+            <input class="discount-input" id="discountInput" type="text" placeholder="MOCCA10">
+            <button class="discount-apply" onclick="applyDiscount()">OK</button>
+          </div>
+          <div class="discount-msg" id="discountMsg"></div>
+        </div>
+        <div class="summary-total"><span>Total</span><span id="total">$0.00</span></div>
+        <button class="checkout-btn" id="checkoutBtn" onclick="checkout()" disabled>Confirmar Pedido</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+
+<!-- QR SECTION -->
+<section class="section-qr" id="qr">
+  <p class="section-label">Acceso Digital</p>
+  <h2 class="qr-section-title">Escanea & Visítanos</h2>
+  <p class="qr-section-sub">Apunta tu cámara al código para abrir la tienda</p>
+  <div class="qr-box">
+    <div class="qr-box-inner">
+      <div id="qrSectionCode"></div>
+    </div>
+    <div class="qr-section-url">wisena25.github.io/Moccaccino</div>
+    <div class="qr-section-hint">Escanea con la cámara de tu teléfono</div>
+    <button class="qr-dl-btn" onclick="downloadQRSection()">⬇ Descargar QR</button>
+  </div>
+</section>
+<footer>
+  <div class="footer-left">
+    <img class="footer-logo" id="footerLogoImg" alt="Moccaccino">
+    <div class="footer-brand">Distribución Industrial · Supermercados & Coffee Shops</div>
+  </div>
+  <div class="footer-copy">© 2025 Ponché de Moccaccino · Proyecto Universitario</div>
+</footer>
+
+<!-- ORDER CONFIRM MODAL -->
+<div class="modal-overlay" id="orderModal">
+  <div class="modal">
+    <div class="modal-icon">✅</div>
+    <h2 class="modal-title">¡Pedido Confirmado!</h2>
+    <p class="modal-text">Tu pedido de Ponché Moccaccino ha sido registrado. Nos pondremos en contacto para coordinar la entrega.</p>
+    <div class="modal-order" id="modalOrder"></div>
+    <button class="modal-close" onclick="closeOrderModal()">Seguir Explorando</button>
+  </div>
+</div>
+
+<!-- QR MODAL -->
+<div class="modal-overlay" id="qrModal">
+  <div class="qr-modal">
+    <h2 class="qr-title">Código QR</h2>
+    <p class="qr-subtitle">Escanea para visitar la tienda</p>
+    <div id="qrcode"></div>
+    <div class="qr-url" id="qrUrl">https://wisena25.github.io/Moccaccino/</div>
+    <button class="qr-download" onclick="downloadQR()">⬇ Descargar QR</button>
+    <button class="qr-close" onclick="closeQR()">Cerrar</button>
+  </div>
+</div>
+
+<script>
+// ---- LOGO BASE64 (injected) ----
+const LOGO_B64 = null;
+const LOGO_SRC = 'logo.png';
+
+// Set all logo images
+window.addEventListener('DOMContentLoaded', () => {
+  ['navLogoImg','heroLogoImg','brandLogoImg','summaryLogoImg','footerLogoImg'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.src = LOGO_SRC;
+  });
+  renderProducts();
+  renderCart();
+  generateQR(); generateQRSection();
+  document.getElementById('discountInput').addEventListener('keydown', e => {
+    if(e.key==='Enter') applyDiscount();
+  });
+});
+
+// ---- Cursor ----
+const cursorEl = document.getElementById('cursor');
+const ringEl = document.getElementById('cursorRing');
+document.addEventListener('mousemove', e => {
+  cursorEl.style.left = e.clientX+'px'; cursorEl.style.top = e.clientY+'px';
+  setTimeout(()=>{ ringEl.style.left=e.clientX+'px'; ringEl.style.top=e.clientY+'px'; },65);
+});
+
+// ---- Products ----
+const products = [
+  { id:1, size:'5 oz',   ml:'148 ml',  price:45,  channel:'Individual / Coffee Shop', desc:'Formato shot perfecto para barras de café y puntos de venta rápida.',    color:'#4A2000', featured:false },
+  { id:2, size:'250 ml', ml:'250 ml',  price:85,  channel:'Supermercado / Retail',    desc:'Paquete personal, ideal para góndola de refrigerados y tiendas de conveniencia.', color:'#3D1A00', featured:false },
+  { id:3, size:'375 ml', ml:'375 ml',  price:120, channel:'Supermercado / Premium',   desc:'Nuestro formato estrella: el más solicitado por distribuidores y cadenas de café.', color:'#2C1200', featured:true  },
+  { id:4, size:'500 ml', ml:'500 ml',  price:155, channel:'Familia / Mayoreo',        desc:'Para consumo familiar y distribución a mayoristas y clubes de precio.', color:'#3D1A00', featured:false },
+  { id:5, size:'750 ml', ml:'750 ml',  price:210, channel:'Premium / Gift',           desc:'Presentación premium para temporadas, obsequios corporativos y exportación.', color:'#4A2000', featured:false },
+];
+
+function makeBottleSVG(color, sizeLabel) {
+  return `
+  <svg class="bottle-svg-el" viewBox="0 0 120 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="bg${sizeLabel}" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#0D0500"/>
+        <stop offset="35%" stop-color="${color}"/>
+        <stop offset="65%" stop-color="#1A0800"/>
+        <stop offset="100%" stop-color="#050200"/>
+      </linearGradient>
+      <linearGradient id="shine${sizeLabel}" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="white" stop-opacity="0"/>
+        <stop offset="35%" stop-color="white" stop-opacity="0.13"/>
+        <stop offset="65%" stop-color="white" stop-opacity="0.04"/>
+        <stop offset="100%" stop-color="white" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <!-- Body -->
+    <path d="M40 52 Q34 58 31 75 L24 170 Q23 186 60 186 Q97 186 96 170 L89 75 Q86 58 80 52 Z" fill="url(#bg${sizeLabel})"/>
+    <path d="M40 52 Q34 58 31 75 L24 170 Q23 186 60 186 Q97 186 96 170 L89 75 Q86 58 80 52 Z" fill="url(#shine${sizeLabel})"/>
+    <!-- Neck -->
+    <rect x="46" y="24" width="28" height="32" rx="5" fill="#1A0800"/>
+    <rect x="49" y="24" width="7" height="32" rx="3" fill="white" fill-opacity="0.06"/>
+    <!-- Cap -->
+    <rect x="42" y="12" width="36" height="16" rx="4" fill="#C8862A"/>
+    <rect x="47" y="15" width="26" height="9" rx="2" fill="#B07020"/>
+    <!-- Bottom glow -->
+    <ellipse cx="60" cy="184" rx="34" ry="5" fill="white" fill-opacity="0.03"/>
+  </svg>`;
+}
+
+function renderProducts() {
+  const grid = document.getElementById('productsGrid');
+  grid.innerHTML = products.map(p => `
+    <div class="product-card ${p.featured?'featured':''}">
+      ${p.featured?'<span class="featured-badge">Más Popular</span>':''}
+      <div class="bottle-wrap" style="animation-delay:${p.id*0.15}s">
+        ${makeBottleSVG(p.color, p.id)}
+        <img class="bottle-logo-overlay" src="${LOGO_SRC}" alt="logo">
+      </div>
+      <div class="product-size">${p.size}</div>
+      <div class="product-name">${p.ml} · Ponché Moccaccino</div>
+      <div class="product-channel">📍 ${p.channel}</div>
+      <p class="product-desc">${p.desc}</p>
+      <div class="product-price">$${p.price.toFixed(2)} <span>MXN</span></div>
+      <button class="add-to-cart" onclick="addToCart(${p.id})">+ Agregar al Pedido</button>
+    </div>
+  `).join('');
+}
+
+// ---- Cart ----
+let cart = [];
+let discountApplied = 0;
+const CODES = { 'MOCCA10':10, 'MOCCA20':20, 'CHOCO15':15 };
+
+function fmt(n) { return '$'+n.toFixed(2); }
+
+function addToCart(id) {
+  const p = products.find(x=>x.id===id);
+  const ex = cart.find(x=>x.id===id);
+  if(ex) ex.qty++; else cart.push({...p, qty:1});
+  renderCart();
+}
+function updateQty(id, d) {
+  const item = cart.find(x=>x.id===id);
+  if(!item) return;
+  item.qty += d;
+  if(item.qty<=0) cart = cart.filter(x=>x.id!==id);
+  renderCart();
+}
+function removeItem(id) { cart=cart.filter(x=>x.id!==id); renderCart(); }
+
+function renderCart() {
+  const c = document.getElementById('cartItems');
+  if(cart.length===0) {
+    c.innerHTML=`<div class="cart-empty"><div class="cart-empty-icon">🛒</div><div class="cart-empty-text">Tu carrito está vacío</div><p style="font-size:.72rem;margin-top:.4rem;opacity:.5">Agrega productos desde el catálogo</p></div>`;
+    updateSummary(); return;
+  }
+  c.innerHTML = cart.map(item=>`
+    <div class="cart-item">
+      <img class="cart-item-logo" src="${LOGO_SRC}" alt="logo">
+      <div class="cart-item-info">
+        <div class="cart-item-name">Ponché Moccaccino</div>
+        <div class="cart-item-size">${item.size} · ${item.ml}</div>
+      </div>
+      <div class="cart-item-controls">
+        <button class="qty-btn" onclick="updateQty(${item.id},-1)">−</button>
+        <span class="qty-display">${item.qty}</span>
+        <button class="qty-btn" onclick="updateQty(${item.id},1)">+</button>
+      </div>
+      <div class="cart-item-price">${fmt(item.price*item.qty)}</div>
+      <button class="cart-item-remove" onclick="removeItem(${item.id})">✕</button>
+    </div>
+  `).join('');
+  updateSummary();
+}
+
+function updateSummary() {
+  const sub = cart.reduce((s,i)=>s+i.price*i.qty, 0);
+  const ship = sub===0?0:(sub>=300?0:60);
+  const disc = sub*(discountApplied/100);
+  const tax = ((sub-disc)+ship)*0.16;
+  const total = (sub-disc)+ship+tax;
+  document.getElementById('subtotal').textContent=fmt(sub);
+  document.getElementById('shipping').textContent=ship===0&&sub>0?'¡Gratis!':fmt(ship);
+  document.getElementById('tax').textContent=fmt(tax);
+  document.getElementById('total').textContent=fmt(total);
+  const dr=document.getElementById('discountRow');
+  if(discountApplied>0&&sub>0){dr.style.display='flex';document.getElementById('discountAmt').textContent='-'+fmt(disc);}
+  else dr.style.display='none';
+  document.getElementById('checkoutBtn').disabled=cart.length===0;
+}
+
+function applyDiscount() {
+  const code=document.getElementById('discountInput').value.trim().toUpperCase();
+  const msg=document.getElementById('discountMsg');
+  if(CODES[code]){discountApplied=CODES[code];msg.className='discount-msg';msg.textContent='✓ Descuento del '+discountApplied+'% aplicado';updateSummary();}
+  else{msg.className='discount-msg error';msg.textContent='✗ Código no válido';}
+}
+
+function checkout() {
+  if(!cart.length) return;
+  const sub=cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const ship=sub>=300?0:60;
+  const disc=sub*(discountApplied/100);
+  const tax=((sub-disc)+ship)*0.16;
+  const total=(sub-disc)+ship+tax;
+  document.getElementById('modalOrder').innerHTML=`
+    <div style="font-size:.7rem;opacity:.55;letter-spacing:.1em;margin-bottom:.6rem;">DETALLE</div>
+    ${cart.map(i=>`<div style="display:flex;justify-content:space-between;"><span>${i.size} ×${i.qty}</span><span>${fmt(i.price*i.qty)}</span></div>`).join('')}
+    <div style="border-top:1px solid rgba(196,122,30,.25);margin-top:.8rem;padding-top:.8rem;display:flex;justify-content:space-between;font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--gold);">
+      <span>Total</span><span>${fmt(total)}</span>
+    </div>`;
+  document.getElementById('orderModal').classList.add('active');
+}
+function closeOrderModal(){
+  document.getElementById('orderModal').classList.remove('active');
+  cart=[];discountApplied=0;
+  document.getElementById('discountInput').value='';
+  document.getElementById('discountMsg').textContent='';
+  renderCart();
+}
+
+// ---- QR ----
+let qrGenerated = false;
+function generateQRSection() {
+  const el = document.getElementById('qrSectionCode');
+  if(el && !el.hasChildNodes()) {
+    new QRCode(el, {
+      text: 'https://wisena25.github.io/Moccaccino/',
+      width: 200, height: 200,
+      colorDark: '#2C1200', colorLight: '#FFFFFF',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  }
+}
+function downloadQRSection() {
+  setTimeout(() => {
+    const canvas = document.querySelector('#qrSectionCode canvas');
+    if(!canvas) return;
+    const a = document.createElement('a');
+    a.download = 'moccaccino-qr.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  }, 300);
+}
+function generateQR() {
+  const url = 'https://wisena25.github.io/Moccaccino/';
+  document.getElementById('qrUrl').textContent = url;
+  if(qrGenerated) return;
+  new QRCode(document.getElementById('qrcode'), {
+    text: url, width:200, height:200,
+    colorDark:'#2C1200', colorLight:'#FFFFFF',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+  qrGenerated = true;
+}
+function openQR() { generateQR(); generateQRSection(); document.getElementById('qrModal').classList.add('active'); }
+function closeQR() { document.getElementById('qrModal').classList.remove('active'); }
+function downloadQR() {
+  const canvas = document.querySelector('#qrcode canvas');
+  if(!canvas) return;
+  const a=document.createElement('a');
+  a.download='moccaccino-qr.png';
+  a.href=canvas.toDataURL('image/png');
+  a.click();
+}
+
+// Close modals on overlay click
+document.getElementById('orderModal').addEventListener('click', function(e){ if(e.target===this) closeOrderModal(); });
+document.getElementById('qrModal').addEventListener('click', function(e){ if(e.target===this) closeQR(); });
+</script>
+</body>
+</html>
